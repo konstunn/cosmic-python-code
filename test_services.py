@@ -94,3 +94,21 @@ def test_trying_to_deallocate_unallocated_batch():
 
     batch = repo.get("b1")
     assert batch.available_quantity == 100
+
+
+def test_get_batches_with_allocations():
+    repo, session = FakeRepository([]), FakeSession()
+
+    services.add_batch("b1", "BLUE-TABLE", 100, None, repo, session)
+    line = model.OrderLine("o1", "BLUE-TABLE", 10)
+    services.allocate(line, repo, session)
+
+    data = services.get_batches_with_allocations(repo, session)
+    assert data == [
+        {
+            "batchref": "b1",
+            "sku": "BLUE-TABLE",
+            "eta": None,
+            "allocations": [{"orderid": "o1", "sku": "BLUE-TABLE", "qty": 10}],
+        }
+    ]

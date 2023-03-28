@@ -46,12 +46,17 @@ def deallocate_endpoint():
 def add_batch_endpoint():
     session = get_session()
     repo = repository.SqlAlchemyRepository(session)
-    batch = model.Batch(
-        request.json["ref"],
-        request.json["sku"],
-        request.json["qty"],
-        request.json["eta"],
-    )
-    repo.add(batch)
-    session.commit()
-    return {"batchref": batch.reference}, 201
+    ref = (request.json["ref"],)
+    sku = (request.json["sku"],)
+    qty = (request.json["qty"],)
+    eta = (request.json["eta"],)
+    batch_ref = services.add_batch(ref, sku, qty, eta, repo, session)
+    return {"batchref": batch_ref}, 201
+
+
+@app.route("/allocations", methods=["GET"])
+def allocations_endpoint():
+    session = get_session()
+    repo = repository.SqlAlchemyRepository(session)
+    data = services.get_batches_with_allocations(repo, session)
+    return data, 200

@@ -126,3 +126,7 @@ class Batch:
 
     def get_allocation_by_orderid(self, orderid):
         return self._allocations.get_allocation_by_orderid(orderid)
+
+    @property
+    def allocations(self):
+        return [a for a in self._allocations]

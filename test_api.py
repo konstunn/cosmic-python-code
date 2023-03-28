@@ -58,7 +58,7 @@ def post_to_add_batch(batch_ref, sku, qty, eta):
     r = requests.post(
         f"{url}/batches", json={"ref": batch_ref, "sku": sku, "qty": qty, "eta": eta}
     )
-    assert r.ok, r.json()
+    assert r.ok, r.content
     assert r.json()["batchref"] == batch_ref
 
 
@@ -99,3 +99,23 @@ def test_deallocate():
     )
     assert r.ok, r.json()
     assert r.json()["batchref"] == batch
+
+
+def post_to_allocate(orderid, sku, qty):
+    url = config.get_api_url()
+
+    r = requests.post(
+        f"{url}/allocate", json={"orderid": orderid, "sku": sku, "qty": qty}
+    )
+    assert r.ok
+
+
+@pytest.mark.usefixtures("postgres_db")
+@pytest.mark.usefixtures("restart_api")
+def test_get_allocations():
+    post_to_add_batch("b1", "SHITTY-CHAIR", 10, None)
+    post_to_allocate("o1", "SHITTY-CHAIR", 2)
+
+    url = config.get_api_url()
+    r = requests.get(f"{url}/allocations")
+    assert r.ok, r.content
