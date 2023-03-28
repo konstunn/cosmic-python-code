@@ -7,7 +7,7 @@ from sqlalchemy.sql import text
 def test_repository_can_save_a_batch(session):
     batch = model.Batch("batch1", "RUSTY-SOAPDISH", 100, eta=None)
 
-    repo = repository.SqlRepository(session)
+    repo = repository.SqlAlchemyRepository(session)
     repo.add(batch)
     session.commit()
 
@@ -62,7 +62,7 @@ def test_repository_can_retrieve_a_batch_with_allocations(session):
     insert_batch(session, "batch2")
     insert_allocation(session, orderline_id, batch1_id)
 
-    repo = repository.SqlRepository(session)
+    repo = repository.SqlAlchemyRepository(session)
     retrieved = repo.get("batch1")
 
     expected = model.Batch("batch1", "GENERIC-SOFA", 100, eta=None)
