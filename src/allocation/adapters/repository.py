@@ -1,13 +1,18 @@
 import abc
+from typing import List
+
+import sqlalchemy.exc
+import typing
+
 from allocation.domain import model
 
 
 class AbstractRepository(abc.ABC):
-    def add(self, batch: model.Batch):
+    def add(self, batch: model.Product):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, reference) -> model.Batch:
+    def get(self, reference) -> model.Product:
         raise NotImplementedError
 
 
@@ -18,8 +23,15 @@ class SqlAlchemyRepository(AbstractRepository):
     def add(self, batch):
         self.session.add(batch)
 
-    def get(self, reference):
-        return self.session.query(model.Batch).filter_by(reference=reference).one()
+    def get(self, sku) -> typing.Optional[model.Product]:
+        try:
+            return self.session.query(model.Product).filter_by(sku=sku).one()
+        except sqlalchemy.exc.NoResultFound:
+            return None
 
-    def list(self):
-        return self.session.query(model.Batch).all()
+    def list(self) -> List[model.Product]:
+        return self.session.query(model.Product).all()
+
+
+class ProductNotFound(Exception):
+    ...

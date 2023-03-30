@@ -10,7 +10,7 @@ def post_to_add_batch(ref, sku, qty, eta):
     r = requests.post(
         f"{url}/add_batch", json={"ref": ref, "sku": sku, "qty": qty, "eta": eta}
     )
-    assert r.status_code == 201
+    assert r.status_code == 201, str(r.content)
 
 
 @pytest.mark.usefixtures("postgres_db")
@@ -28,7 +28,7 @@ def test_happy_path_returns_201_and_allocated_batch():
     url = config.get_api_url()
     r = requests.post(f"{url}/allocate", json=data)
 
-    assert r.status_code == 201
+    assert r.status_code == 201, str(r.content)
     assert r.json()["batchref"] == earlybatch
 
 
@@ -39,5 +39,5 @@ def test_unhappy_path_returns_400_and_error_message():
     data = {"orderid": orderid, "sku": unknown_sku, "qty": 20}
     url = config.get_api_url()
     r = requests.post(f"{url}/allocate", json=data)
-    assert r.status_code == 400
+    assert r.status_code == 400, str(r.content)
     assert r.json()["message"] == f"Invalid sku {unknown_sku}"
