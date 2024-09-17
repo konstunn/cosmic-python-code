@@ -30,3 +30,33 @@ def allocate_endpoint():
         return {"message": str(e)}, 400
 
     return {"batchref": batchref}, 201
+
+
+@app.route("/deallocate", methods=["POST"])
+def deallocate_endpoint():
+    session = get_session()
+    repo = repository.SqlAlchemyRepository(session)
+    orderid = request.json["orderid"]
+    sku = request.json["sku"]
+    batchref = services.deallocate(orderid, sku, repo, session)
+    return {"batchref": batchref}, 201
+
+
+@app.route("/batches", methods=["POST"])
+def add_batch_endpoint():
+    session = get_session()
+    repo = repository.SqlAlchemyRepository(session)
+    ref = (request.json["ref"],)
+    sku = (request.json["sku"],)
+    qty = (request.json["qty"],)
+    eta = (request.json["eta"],)
+    batch_ref = services.add_batch(ref, sku, qty, eta, repo, session)
+    return {"batchref": batch_ref}, 201
+
+
+@app.route("/allocations", methods=["GET"])
+def allocations_endpoint():
+    session = get_session()
+    repo = repository.SqlAlchemyRepository(session)
+    data = services.get_batches_with_allocations(repo, session)
+    return data, 200
